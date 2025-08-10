@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -5,8 +7,29 @@ import { Header } from "@/components/layout/Header";
 import { Users, FileText, Activity, BarChart3, UserPlus, Shield, Database, AlertTriangle } from "lucide-react";
 
 export default function AdminDashboard() {
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchTotalUsers = () => {
+      axios
+        .get("http://localhost:8080/api/users/total")
+        .then((res) => {
+          setTotalUsers(res.data.total);
+          console.log("✅ Backend response:", res.data);
+        })
+        .catch((err) => {
+          console.error("Error fetching total users:", err);
+        });
+    };
+
+    fetchTotalUsers(); // First load
+    // const intervalId = setInterval(); // Refresh every 10 sec
+
+    return () => clearInterval; // Cleanup
+  }, []);
+
   const stats = [
-    { title: "Total Users", value: "156", icon: Users, color: "text-primary" },
+    { title: "Total Users", value: totalUsers !== null ? totalUsers.toString() : "...", icon: Users, color: "text-primary" },
     { title: "Active Cases", value: "89", icon: FileText, color: "text-blue-600" },
     { title: "System Alerts", value: "12", icon: AlertTriangle, color: "text-destructive" },
     { title: "Database Health", value: "98%", icon: Database, color: "text-green-600" },
@@ -108,11 +131,17 @@ export default function AdminDashboard() {
               <div className="space-y-3">
                 {recentActivities.map((activity, index) => (
                   <div key={index} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${
-                      activity.type === 'create' ? 'bg-green-500' :
-                      activity.type === 'update' ? 'bg-blue-500' :
-                      activity.type === 'incident' ? 'bg-yellow-500' : 'bg-gray-500'
-                    }`} />
+                    <div
+                      className={`w-2 h-2 rounded-full mt-2 ${
+                        activity.type === "create"
+                          ? "bg-green-500"
+                          : activity.type === "update"
+                          ? "bg-blue-500"
+                          : activity.type === "incident"
+                          ? "bg-yellow-500"
+                          : "bg-gray-500"
+                      }`}
+                    />
                     <div className="flex-1">
                       <p className="text-sm font-medium">{activity.user}</p>
                       <p className="text-sm text-muted-foreground">{activity.action}</p>
@@ -152,7 +181,9 @@ export default function AdminDashboard() {
                 <h3 className="font-semibold">System Reports</h3>
                 <p className="text-sm text-muted-foreground">Generate performance and activity reports</p>
               </div>
-              <Button className="w-full" variant="outline">Generate Reports</Button>
+              <Button className="w-full" variant="outline">
+                Generate Reports
+              </Button>
             </CardContent>
           </Card>
 
@@ -165,7 +196,9 @@ export default function AdminDashboard() {
                 <h3 className="font-semibold">System Health</h3>
                 <p className="text-sm text-muted-foreground">Monitor database and performance metrics</p>
               </div>
-              <Button className="w-full" variant="outline">View Metrics</Button>
+              <Button className="w-full" variant="outline">
+                View Metrics
+              </Button>
             </CardContent>
           </Card>
         </div>
