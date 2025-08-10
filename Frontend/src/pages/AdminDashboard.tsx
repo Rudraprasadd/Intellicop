@@ -1,0 +1,175 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Header } from "@/components/layout/Header";
+import { Users, FileText, Activity, BarChart3, UserPlus, Shield, Database, AlertTriangle } from "lucide-react";
+
+export default function AdminDashboard() {
+  const stats = [
+    { title: "Total Users", value: "156", icon: Users, color: "text-primary" },
+    { title: "Active Cases", value: "89", icon: FileText, color: "text-blue-600" },
+    { title: "System Alerts", value: "12", icon: AlertTriangle, color: "text-destructive" },
+    { title: "Database Health", value: "98%", icon: Database, color: "text-green-600" },
+  ];
+
+  const recentActivities = [
+    { user: "Officer Smith", action: "Created new criminal profile", time: "2 mins ago", type: "create" },
+    { user: "Detective Brown", action: "Updated case #2024-001", time: "15 mins ago", type: "update" },
+    { user: "Officer Wilson", action: "Logged patrol incident", time: "1 hour ago", type: "incident" },
+    { user: "System", action: "Database backup completed", time: "2 hours ago", type: "system" },
+  ];
+
+  const userRoles = [
+    { role: "Patrol Officers", count: 45, color: "bg-primary" },
+    { role: "Desk Officers", count: 28, color: "bg-secondary" },
+    { role: "Field Officers", count: 35, color: "bg-accent" },
+    { role: "Investigating Officers", count: 22, color: "bg-primary/80" },
+    { role: "Administrators", count: 5, color: "bg-destructive" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+      <Header />
+      
+      <main className="container mx-auto p-6 space-y-6">
+        {/* Welcome Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Administrator Dashboard</h1>
+            <p className="text-muted-foreground">System overview and management controls</p>
+          </div>
+          <Badge className="bg-destructive text-destructive-foreground px-4 py-2">
+            <Shield className="w-4 h-4 mr-1" />
+            ADMIN ACCESS
+          </Badge>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat) => (
+            <Card key={stat.title} className="shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">{stat.title}</p>
+                    <p className="text-3xl font-bold">{stat.value}</p>
+                  </div>
+                  <stat.icon className={`w-8 h-8 ${stat.color}`} />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* User Management */}
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                User Management
+              </CardTitle>
+              <CardDescription>Manage system users and roles</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                {userRoles.map((role) => (
+                  <div key={role.role} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${role.color}`} />
+                      <span className="font-medium">{role.role}</span>
+                    </div>
+                    <Badge variant="outline">{role.count}</Badge>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button className="flex-1">
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Add User
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  Manage Roles
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* System Activity */}
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Recent System Activity
+              </CardTitle>
+              <CardDescription>Monitor user actions and system events</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentActivities.map((activity, index) => (
+                  <div key={index} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                    <div className={`w-2 h-2 rounded-full mt-2 ${
+                      activity.type === 'create' ? 'bg-green-500' :
+                      activity.type === 'update' ? 'bg-blue-500' :
+                      activity.type === 'incident' ? 'bg-yellow-500' : 'bg-gray-500'
+                    }`} />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{activity.user}</p>
+                      <p className="text-sm text-muted-foreground">{activity.action}</p>
+                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" className="w-full mt-4">
+                View Full Activity Log
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Management Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+            <CardContent className="p-6 text-center space-y-4">
+              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <FileText className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Criminal Records</h3>
+                <p className="text-sm text-muted-foreground">View and manage all criminal profiles</p>
+              </div>
+              <Button className="w-full">Access Records</Button>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+            <CardContent className="p-6 text-center space-y-4">
+              <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">System Reports</h3>
+                <p className="text-sm text-muted-foreground">Generate performance and activity reports</p>
+              </div>
+              <Button className="w-full" variant="outline">Generate Reports</Button>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+            <CardContent className="p-6 text-center space-y-4">
+              <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <Database className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">System Health</h3>
+                <p className="text-sm text-muted-foreground">Monitor database and performance metrics</p>
+              </div>
+              <Button className="w-full" variant="outline">View Metrics</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
+}

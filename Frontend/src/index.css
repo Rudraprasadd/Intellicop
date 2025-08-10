@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Professional Law Enforcement Theme */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Navy Blue Primary - Authority & Trust */
+    --primary: 215 85% 25%;
+    --primary-foreground: 210 40% 98%;
+    --primary-glow: 215 90% 35%;
+
+    /* Steel Blue Secondary */
+    --secondary: 210 15% 92%;
+    --secondary-foreground: 215 25% 15%;
+
+    --muted: 210 15% 95%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Professional Accent */
+    --accent: 210 50% 85%;
+    --accent-foreground: 215 25% 15%;
+
+    /* Alert Red for Critical Actions */
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 210 20% 88%;
+    --input: 210 20% 95%;
+    --ring: 215 85% 25%;
+
+    /* Professional Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-header: linear-gradient(90deg, hsl(215 90% 20%), hsl(215 85% 25%));
+    --gradient-surface: linear-gradient(180deg, hsl(var(--background)), hsl(210 15% 95%));
+
+    /* Shadows for Authority */
+    --shadow-professional: 0 4px 12px -2px hsl(215 25% 15% / 0.08);
+    --shadow-elevated: 0 8px 24px -4px hsl(215 25% 15% / 0.12);
+    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.15);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark Mode Law Enforcement Theme */
+    --background: 215 25% 8%;
+    --foreground: 210 20% 95%;
+
+    --card: 215 20% 12%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 215 20% 12%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 215 80% 65%;
+    --primary-foreground: 215 25% 8%;
+    --primary-glow: 215 85% 70%;
+
+    --secondary: 215 15% 18%;
+    --secondary-foreground: 210 20% 95%;
+
+    --muted: 215 15% 15%;
+    --muted-foreground: 215 10% 65%;
+
+    --accent: 215 25% 25%;
+    --accent-foreground: 210 20% 95%;
+
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 210 20% 95%;
+
+    --border: 215 15% 20%;
+    --input: 215 15% 15%;
+    --ring: 215 80% 65%;
+
+    /* Dark Mode Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-header: linear-gradient(90deg, hsl(215 30% 10%), hsl(215 25% 15%));
+    --gradient-surface: linear-gradient(180deg, hsl(var(--background)), hsl(215 20% 10%));
+
+    /* Dark Mode Shadows */
+    --shadow-professional: 0 4px 12px -2px hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 8px 24px -4px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.3);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
