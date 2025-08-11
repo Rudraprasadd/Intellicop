@@ -21,12 +21,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('intelicop_user');
+    // Restore from sessionStorage
+    const storedUser = sessionStorage.getItem('intelicop_user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
     setIsLoading(false);
   }, []);
+
+  // 🔹 Ask before reload & log out if confirmed
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (user) {
+        const confirmationMessage = 'Do you want to log out before reloading?';
+        event.preventDefault();
+        event.returnValue = confirmationMessage;
+
+        // ✅ Clear session so that after reload, user must log in again
+        sessionStorage.removeItem('intelicop_user');
+        setUser(null);
+
+        return confirmationMessage;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [user]);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     setIsLoading(true);
@@ -38,13 +59,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       const data = await res.json();
-      // console.log(data);
 
       if (res.ok && data.success) {
         const loggedUser: User = { username, role: data.role };
         setUser(loggedUser);
-        console.log(user);
-        localStorage.setItem('intelicop_user', JSON.stringify(loggedUser));
+        sessionStorage.setItem('intelicop_user', JSON.stringify(loggedUser));
         return true;
       }
     } catch (error) {
@@ -57,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('intelicop_user');
+    sessionStorage.removeItem('intelicop_user');
   };
 
   return (
