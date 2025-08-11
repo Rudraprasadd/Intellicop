@@ -12,6 +12,7 @@ import DeskDashboard from "./pages/DeskDashboard";
 import FieldDashboard from "./pages/FieldDashboard";
 import InvestigatingDashboard from "./pages/InvestigatingDashboard";
 import NotFound from "./pages/NotFound";
+import AddUserForm from "./pages/AddUser";
 
 const queryClient = new QueryClient();
 
@@ -150,7 +151,18 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/add-user"
+                element={
+                  <ProtectedRoute>
+                    <RoleRoute allowedRole="admin">
+                      <AddUserForm />
+                    </RoleRoute>
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; 
 import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,11 +16,12 @@ export default function AdminDashboard() {
     investigatingOfficers: 0,
     administrators: 0,
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/api/users/total");
+        const res = await axios.get("http://localhost:8081/api/users/total");
         const data = res.data;
 
         // Map backend roles to frontend state
@@ -130,7 +132,8 @@ export default function AdminDashboard() {
                 ))}
               </div>
               <div className="flex gap-2 pt-4">
-                <Button className="flex-1">
+                <Button className="flex-1"
+                 onClick={() =>  navigate("/add-user", { replace: true })}>
                   <UserPlus className="w-4 h-4 mr-1" />
                   Add User
                 </Button>
