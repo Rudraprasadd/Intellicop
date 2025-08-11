@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+# Ignore development config
+src/main/resources/application-dev.properties
