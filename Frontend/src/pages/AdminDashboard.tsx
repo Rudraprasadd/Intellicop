@@ -7,29 +7,52 @@ import { Header } from "@/components/layout/Header";
 import { Users, FileText, Activity, BarChart3, UserPlus, Shield, Database, AlertTriangle } from "lucide-react";
 
 export default function AdminDashboard() {
-  const [totalUsers, setTotalUsers] = useState<number | null>(null);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [roleCounts, setRoleCounts] = useState({
+    patrolOfficers: 0,
+    deskOfficers: 0,
+    fieldOfficers: 0,
+    investigatingOfficers: 0,
+    administrators: 0,
+  });
 
   useEffect(() => {
-    const fetchTotalUsers = () => {
-      axios
-        .get("http://localhost:8080/api/users/total")
-        .then((res) => {
-          setTotalUsers(res.data.total);
-          console.log("✅ Backend response:", res.data);
-        })
-        .catch((err) => {
-          console.error("Error fetching total users:", err);
-        });
+    const fetchData = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/api/users/total");
+        const data = res.data;
+
+        // Map backend roles to frontend state
+        const counts = {
+          patrolOfficers: data.roleWiseCount?.PATROL ?? 0,
+          deskOfficers: data.roleWiseCount?.DESK ?? 0,
+          fieldOfficers: data.roleWiseCount?.FIELD ?? 0,
+          investigatingOfficers: data.roleWiseCount?.INVESTIGATING ?? 0,
+          administrators: data.roleWiseCount?.ADMIN ?? 0,
+        };
+
+        setRoleCounts(counts);
+
+        // Use backend total directly
+        if (typeof data.totalUsers === "number") {
+          setTotalUsers(data.totalUsers);
+        } else {
+          // Fallback: calculate total from role counts
+          const calculatedTotal = Object.values(counts).reduce((sum, val) => sum + val, 0);
+          setTotalUsers(calculatedTotal);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching user data:", err);
+      }
     };
 
-    fetchTotalUsers(); // First load
-    // const intervalId = setInterval(); // Refresh every 10 sec
-
-    return () => clearInterval; // Cleanup
+    fetchData();
+    const intervalId = setInterval(fetchData, 10000);
+    return () => clearInterval(intervalId);
   }, []);
 
   const stats = [
-    { title: "Total Users", value: totalUsers !== null ? totalUsers.toString() : "...", icon: Users, color: "text-primary" },
+    { title: "Total Users", value: totalUsers.toString(), icon: Users, color: "text-primary" },
     { title: "Active Cases", value: "89", icon: FileText, color: "text-blue-600" },
     { title: "System Alerts", value: "12", icon: AlertTriangle, color: "text-destructive" },
     { title: "Database Health", value: "98%", icon: Database, color: "text-green-600" },
@@ -43,17 +66,17 @@ export default function AdminDashboard() {
   ];
 
   const userRoles = [
-    { role: "Patrol Officers", count: 45, color: "bg-primary" },
-    { role: "Desk Officers", count: 28, color: "bg-secondary" },
-    { role: "Field Officers", count: 35, color: "bg-accent" },
-    { role: "Investigating Officers", count: 22, color: "bg-primary/80" },
-    { role: "Administrators", count: 5, color: "bg-destructive" },
+    { role: "Patrol Officers", count: roleCounts.patrolOfficers, color: "bg-primary" },
+    { role: "Desk Officers", count: roleCounts.deskOfficers, color: "bg-secondary" },
+    { role: "Field Officers", count: roleCounts.fieldOfficers, color: "bg-accent" },
+    { role: "Investigating Officers", count: roleCounts.investigatingOfficers, color: "bg-primary/80" },
+    { role: "Administrators", count: roleCounts.administrators, color: "bg-destructive" },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
       <Header />
-      
+
       <main className="container mx-auto p-6 space-y-6">
         {/* Welcome Header */}
         <div className="flex items-center justify-between">
