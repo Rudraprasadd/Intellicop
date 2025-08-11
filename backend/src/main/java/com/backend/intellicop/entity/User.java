@@ -32,4 +32,7 @@ public class User {
 
     @Column(nullable = false)
     private String role; // ADMIN, PATROL, DESK, FIELD, INVESTIGATING
+
+    @Column(name = "photo_url")
+    private String photoUrl; // Cloudinary image URL
 }

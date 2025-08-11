@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:8081/api/users/total");
+        const res = await axios.get("http://localhost:8080/api/users/total");
         const data = res.data;
 
         // Map backend roles to frontend state

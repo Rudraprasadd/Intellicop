@@ -14,6 +14,7 @@ import InvestigatingDashboard from "./pages/InvestigatingDashboard";
 import NotFound from "./pages/NotFound";
 import AddUserForm from "./pages/AddUser";
 
+
 const queryClient = new QueryClient();
 
 // Protected Route Component
