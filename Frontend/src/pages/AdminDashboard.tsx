@@ -137,7 +137,8 @@ export default function AdminDashboard() {
                   <UserPlus className="w-4 h-4 mr-1" />
                   Add User
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1"
+                 onClick={() =>  navigate("/manage-role", { replace: true })}>
                   Manage Roles
                 </Button>
               </div>
