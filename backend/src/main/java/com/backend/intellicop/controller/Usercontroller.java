@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,23 +21,33 @@ import com.backend.intellicop.entity.User;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@RequestMapping("/api/users")
+@Tag(name = "User Management", description = "Endpoints for managing users")
 public class Usercontroller {
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // for encrypting password
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private Cloudinary cloudinary; // for uploading images
+    private Cloudinary cloudinary;
 
-    // -------------------- EXISTING --------------------
-    @GetMapping("/api/users/total")
+    @Operation(
+            summary = "Get total user count & role-wise breakdown",
+            description = "Returns the total number of users and how many users exist for each role"
+    )
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved user counts")
+    @GetMapping("/total")
     public ResponseEntity<Map<String, Object>> getUserCounts() {
-        System.out.println("✅ /api/users/total endpoint was called");
-
         Map<String, Object> response = new HashMap<>();
 
         long totalUsers = userRepository.count();
@@ -52,12 +63,21 @@ public class Usercontroller {
         }
         response.put("roleWiseCount", roleWiseMap);
 
-        System.out.println("✅ Sending response: " + response);
         return ResponseEntity.ok(response);
     }
 
-    // -------------------- NEW: ADD USER --------------------
-    @PostMapping("/api/users/add")
+    @Operation(
+            summary = "Add a new user",
+            description = "Creates a new user with photo, encrypted password, and assigned role",
+            requestBody = @RequestBody(
+                    required = true,
+                    description = "User details with photo",
+                    content = @Content(mediaType = "multipart/form-data")
+            )
+    )
+    @ApiResponse(responseCode = "201", description = "User created successfully")
+    @ApiResponse(responseCode = "500", description = "Error processing photo")
+    @PostMapping("/add")
     public ResponseEntity<?> addUser(
             @RequestParam("photo") MultipartFile photo,
             @RequestParam String loginId,
@@ -65,18 +85,15 @@ public class Usercontroller {
             @RequestParam String role
     ) {
         try {
-            // Upload photo to Cloudinary
             Map uploadResult = cloudinary.uploader().upload(photo.getBytes(), ObjectUtils.emptyMap());
             String photoUrl = uploadResult.get("secure_url").toString();
 
-            // Create user object
             User user = new User();
-            user.setUsername(loginId); // mapping loginId → username
+            user.setUsername(loginId);
             user.setPassword(passwordEncoder.encode(password));
             user.setRole(role);
             user.setPhotoUrl(photoUrl);
 
-            // Save in DB
             userRepository.save(user);
 
             Map<String, Object> res = new HashMap<>();

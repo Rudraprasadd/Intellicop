@@ -18,24 +18,46 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final String[] SWAGGER_WHITELIST = {
+        "/v3/api-docs/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html"
+    };
+
+    private static final String[] PUBLIC_APIS = {
+        "/auth/**",
+        "/api/users/total",
+        "/api/users/add"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/api/users/total").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/users/add").permitAll() // allow adding users for now
+                // Swagger and API Docs
+                .requestMatchers(SWAGGER_WHITELIST).permitAll()
+
+                // Public APIs
+                .requestMatchers(PUBLIC_APIS).permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/users/add").permitAll()
+
+                // Everything else needs authentication
                 .anyRequest().authenticated()
-            );
+            )
+            .httpBasic();
+
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:5173", // React Frontend
+            "http://localhost:8081"  // Swagger UI (if separate)
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
