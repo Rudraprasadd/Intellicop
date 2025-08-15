@@ -9,6 +9,7 @@ import { Users, FileText, Activity, BarChart3, UserPlus, Shield, Database, Alert
 
 export default function AdminDashboard() {
   const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [databaseHealth, setDatabaseHealth] = useState<number>(0);
   const [roleCounts, setRoleCounts] = useState({
     patrolOfficers: 0,
     deskOfficers: 0,
@@ -18,11 +19,25 @@ export default function AdminDashboard() {
   });
   const navigate = useNavigate();
 
+  const fetchDatabaseHealth = async () => {
+    try {
+      const res = await axios.get("http://localhost:8081/api/health/database");
+      setDatabaseHealth(res.data.healthPercentage);
+    } catch (err) {
+      console.error("❌ Error fetching database health:", err);
+      setDatabaseHealth(0);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:8081/api/users/total");
-        const data = res.data;
+        const [usersRes, healthRes] = await Promise.all([
+          axios.get("http://localhost:8081/api/users/total"),
+          axios.get("http://localhost:8081/api/health/database")
+        ]);
+
+        const data = usersRes.data;
 
         // Map backend roles to frontend state
         const counts = {
@@ -34,6 +49,7 @@ export default function AdminDashboard() {
         };
 
         setRoleCounts(counts);
+        setDatabaseHealth(healthRes.data.healthPercentage);
 
         // Use backend total directly
         if (typeof data.totalUsers === "number") {
@@ -44,7 +60,7 @@ export default function AdminDashboard() {
           setTotalUsers(calculatedTotal);
         }
       } catch (err) {
-        console.error("❌ Error fetching user data:", err);
+        console.error("❌ Error fetching data:", err);
       }
     };
 
@@ -57,7 +73,14 @@ export default function AdminDashboard() {
     { title: "Total Users", value: totalUsers.toString(), icon: Users, color: "text-primary" },
     { title: "Active Cases", value: "89", icon: FileText, color: "text-blue-600" },
     { title: "System Alerts", value: "12", icon: AlertTriangle, color: "text-destructive" },
-    { title: "Database Health", value: "98%", icon: Database, color: "text-green-600" },
+    { 
+      title: "Database Health", 
+      value: `${databaseHealth}%`, 
+      icon: Database, 
+      color: databaseHealth > 75 ? "text-green-600" : 
+             databaseHealth > 50 ? "text-yellow-600" : 
+             "text-destructive" 
+    },
   ];
 
   const recentActivities = [

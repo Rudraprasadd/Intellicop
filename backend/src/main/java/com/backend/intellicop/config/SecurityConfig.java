@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,13 +22,20 @@ public class SecurityConfig {
     private static final String[] SWAGGER_WHITELIST = {
         "/v3/api-docs/**",
         "/swagger-ui/**",
-        "/swagger-ui.html"
+        "/swagger-ui.html",
+        "/swagger-resources/**",
+        "/swagger-resources",
+        "/webjars/**",
+        "/api-docs/**",
+        "/api-docs.yaml",
+        "/v3/api-docs.yaml"
     };
 
     private static final String[] PUBLIC_APIS = {
         "/auth/**",
         "/api/users/total",
-        "/api/users/add"
+        "/api/users/add",
+        "/api/health/database"
     };
 
     @Bean
@@ -35,28 +43,22 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                // Swagger and API Docs
+            .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(SWAGGER_WHITELIST).permitAll()
-
-                // Public APIs
                 .requestMatchers(PUBLIC_APIS).permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users/add").permitAll()
-
-                // Everything else needs authentication
                 .anyRequest().authenticated()
             )
-            .httpBasic();
-
+            .httpBasic(withDefaults());
+    
         return http.build();
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
             "http://localhost:5173", // React Frontend
-            "http://localhost:8081"  // Swagger UI (if separate)
+            "http://localhost:8081"  // Swagger UI
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

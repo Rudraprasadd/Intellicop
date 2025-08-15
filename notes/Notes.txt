@@ -1,0 +1,5 @@
+API UI :-
+http://localhost:8081/swagger-ui/index.html#/
+
+API RAW DOCS :-
+http://localhost:8081/v3/api-docs
