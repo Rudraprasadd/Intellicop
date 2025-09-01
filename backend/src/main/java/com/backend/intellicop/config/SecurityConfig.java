@@ -35,7 +35,11 @@ public class SecurityConfig {
         "/auth/**",
         "/api/users/total",
         "/api/users/add",
-        "/api/health/database"
+        "/api/health/database",
+        "/api/users",           // Allow access to users endpoint
+        "/api/users/**",        // Allow access to specific user endpoints
+        "/auth/debug/**",       // Allow debug endpoints
+        "/auth/create-test-user" // Allow test user creation
     };
 
     @Bean
@@ -46,23 +50,29 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(SWAGGER_WHITELIST).permitAll()
                 .requestMatchers(PUBLIC_APIS).permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll() // Allow GET requests to users
                 .requestMatchers(HttpMethod.POST, "/api/users/add").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/users/**/role").permitAll() // Allow role updates
+                .requestMatchers(HttpMethod.DELETE, "/api/users/**").permitAll() // Allow user deletion
                 .anyRequest().authenticated()
             )
             .httpBasic(withDefaults());
     
         return http.build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
             "http://localhost:5173", // React Frontend
+            "http://localhost:3000", // Alternative React port
             "http://localhost:8081"  // Swagger UI
         ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

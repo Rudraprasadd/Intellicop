@@ -31,16 +31,10 @@ const AddUserForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [policeId, setPoliceId] = useState("");
 
   const handleConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setConfirmPassword(e.target.value);
-  };
-
-  const handlePoliceIdChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPoliceId(e.target.value);
   };
 
   const handleChange = (
@@ -77,12 +71,14 @@ const AddUserForm: React.FC = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    // Convert role to backend format (UPPERCASE)
+    const backendRole = formData.role.toUpperCase().replace(' ', '_');
+    
     const data = new FormData();
     data.append("photo", formData.photo as Blob);
     data.append("loginId", formData.loginId);
     data.append("password", formData.password);
-    data.append("role", formData.role);
-    data.append("policeId", policeId);
+    data.append("role", backendRole);
 
     try {
       const res = await fetch("http://localhost:8081/api/users/add", {
@@ -91,16 +87,17 @@ const AddUserForm: React.FC = () => {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to add user");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to add user");
       }
 
       const result = await res.json();
-      console.log("Server Response:", result); // policeId not expected here
+      console.log("Server Response:", result);
       alert("User added successfully!");
       navigate("/dashboard");
     } catch (err) {
-      console.error(err);
-      alert("Error adding user");
+      console.error("Error adding user:", err);
+      alert("Error adding user: " + (err instanceof Error ? err.message : "Unknown error"));
     }
   };
 
@@ -141,6 +138,7 @@ const AddUserForm: React.FC = () => {
               accept="image/*"
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+              required
             />
             {preview && (
               <img
@@ -163,21 +161,7 @@ const AddUserForm: React.FC = () => {
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
               placeholder="Enter login ID"
-            />
-          </div>
-
-          {/* Police ID */}
-          <div>
-            <label className="block font-medium mb-2 flex items-center gap-2">
-              <FaIdBadge /> Police ID
-            </label>
-            <input
-              type="text"
-              name="policeId"
-              value={policeId}
-              onChange={handlePoliceIdChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              placeholder="Enter police ID"
+              required
             />
           </div>
 
@@ -193,12 +177,14 @@ const AddUserForm: React.FC = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                placeholder="Enter password"
+                placeholder="Enter password (min 6 characters)"
+                minLength={6}
+                required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
@@ -218,11 +204,12 @@ const AddUserForm: React.FC = () => {
                 onChange={handleConfirmPasswordChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                 placeholder="Confirm password"
+                required
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
                 {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
@@ -239,6 +226,7 @@ const AddUserForm: React.FC = () => {
               value={formData.role}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+              required
             >
               <option value="">Select Role</option>
               <option value="Patrol Officer">Patrol Officer</option>
@@ -248,6 +236,9 @@ const AddUserForm: React.FC = () => {
                 Investigating Officer
               </option>
             </select>
+            <p className="text-sm text-gray-500 mt-1">
+              Note: Will be converted to uppercase format for the system
+            </p>
           </div>
 
           {/* Submit */}
