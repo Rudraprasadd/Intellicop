@@ -25,21 +25,26 @@ public class SecurityConfig {
         "/swagger-ui.html",
         "/swagger-resources/**",
         "/swagger-resources",
+        "/api/health/database/report",
         "/webjars/**",
         "/api-docs/**",
         "/api-docs.yaml",
         "/v3/api-docs.yaml"
     };
 
+    
     private static final String[] PUBLIC_APIS = {
         "/auth/**",
         "/api/users/total",
         "/api/users/add",
         "/api/health/database",
-        "/api/users",           // Allow access to users endpoint
-        "/api/users/**",        // Allow access to specific user endpoints
-        "/auth/debug/**",       // Allow debug endpoints
-        "/auth/create-test-user" // Allow test user creation
+        "/api/criminals/**",      // <-- Added for public access
+        "/api/users",             // Allow access to users endpoint
+        "/api/users/**",          // Allow access to specific user endpoints
+        "/auth/debug/**",         // Allow debug endpoints
+        "/auth/create-test-user",  // Allow test user creation
+        "/api/visitors/**",         // Allow access to visitor meetings
+        "/api/visitors/**"
     };
 
     @Bean
@@ -54,10 +59,16 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/users/add").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/users/**/role").permitAll() // Allow role updates
                 .requestMatchers(HttpMethod.DELETE, "/api/users/**").permitAll() // Allow user deletion
+                .requestMatchers(HttpMethod.GET, "/api/criminals/**").permitAll() // allow fetching
+                .requestMatchers(HttpMethod.GET, "/api/visitors/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/visitors/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/visitors/**").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/api/visitors/**").permitAll()
+                .requestMatchers("/api/criminals/**").permitAll()
                 .anyRequest().authenticated()
             )
             .httpBasic(withDefaults());
-    
+
         return http.build();
     }
 

@@ -218,7 +218,7 @@ export default function AdminDashboard() {
                 <h3 className="font-semibold">Criminal Records</h3>
                 <p className="text-sm text-muted-foreground">View and manage all criminal profiles</p>
               </div>
-              <Button className="w-full">Access Records</Button>
+              <Button  className="w-full" onClick={() => navigate("/criminal-records")}>Access Records</Button>
             </CardContent>
           </Card>
 
@@ -246,7 +246,25 @@ export default function AdminDashboard() {
                 <h3 className="font-semibold">System Health</h3>
                 <p className="text-sm text-muted-foreground">Monitor database and performance metrics</p>
               </div>
-              <Button className="w-full" variant="outline">
+              <Button className="w-full" 
+                variant="outline"
+                onClick={async () => {
+                  try {
+                    const res = await axios.get("http://localhost:8081/api/health/database/report", {
+                      responseType: "blob", // important for binary PDF
+                    });
+
+                    const url = window.URL.createObjectURL(new Blob([res.data]));
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.setAttribute("download", "database_health_report.pdf");
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                  } catch (err) {
+                    console.error("❌ Error downloading report:", err);
+                  }
+                }}>
                 View Metrics
               </Button>
             </CardContent>

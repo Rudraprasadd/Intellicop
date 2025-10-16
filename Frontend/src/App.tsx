@@ -14,7 +14,9 @@ import InvestigatingDashboard from "./pages/InvestigatingDashboard";
 import NotFound from "./pages/NotFound";
 import AddUserForm from "./pages/AddUser";
 import ManageRole from "./pages/ManageRole";
-
+import CriminalRecords from "./pages/CriminalRecords";
+import VisitorDataPage from "./pages/VisitorDataPage";
+import TodayVisitorsPage from "./pages/TodayVisitorsPage";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +63,27 @@ const RoleRoute = ({
   return <>{children}</>;
 };
 
+// Multi-role Route Component (case-insensitive role check)
+const MultiRoleRoute = ({
+  allowedRoles,
+  children,
+}: {
+  allowedRoles: string[];
+  children: React.ReactNode;
+}) => {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!allowedRoles.map(role => role.toLowerCase()).includes(user.role.toLowerCase())) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 // Dashboard Router - routes users to their role-specific dashboard
 const DashboardRouter = () => {
   const { user } = useAuth();
@@ -90,8 +113,8 @@ const App = () => (
     <ThemeProvider>
       <AuthProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
+          <Toaster  />
+          <Sonner position="top-right"  />
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<Login />} />
@@ -170,6 +193,36 @@ const App = () => (
                   <ProtectedRoute>
                     <RoleRoute allowedRole="admin">
                       <ManageRole />
+                    </RoleRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/criminal-records"
+                element={
+                  <ProtectedRoute>
+                    <MultiRoleRoute allowedRoles={["admin", "patrol", "investigating","desk","field"]}>
+                      <CriminalRecords />
+                    </MultiRoleRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/visitor-data"
+                element={
+                  <ProtectedRoute>
+                    <RoleRoute allowedRole="desk">
+                      <VisitorDataPage />
+                    </RoleRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/today-visitors"
+                element={
+                  <ProtectedRoute>
+                    <RoleRoute allowedRole="desk">
+                      <TodayVisitorsPage />
                     </RoleRoute>
                   </ProtectedRoute>
                 }

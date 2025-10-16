@@ -1,10 +1,15 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
 import { MapPin, AlertTriangle, Camera, Search, Radio, Clock, Plus, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function PatrolDashboard() {
+  const navigate = useNavigate();
+
   const activeAlerts = [
     { id: "ALT-001", type: "WANTED", suspect: "John Doe", location: "Downtown Plaza", priority: "HIGH", time: "5 mins ago" },
     { id: "ALT-002", type: "SUSPICIOUS", suspect: "Unknown Male", location: "Park Avenue", priority: "MEDIUM", time: "12 mins ago" },
@@ -26,36 +31,33 @@ export default function PatrolDashboard() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH': return 'bg-destructive text-destructive-foreground';
-      case 'MEDIUM': return 'bg-yellow-500 text-white';
-      case 'LOW': return 'bg-green-500 text-white';
-      default: return 'bg-muted text-muted-foreground';
+      case "HIGH": return "bg-destructive text-destructive-foreground";
+      case "MEDIUM": return "bg-yellow-500 text-white";
+      case "LOW": return "bg-green-500 text-white";
+      default: return "bg-muted text-muted-foreground";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Reported': return 'bg-blue-500 text-white';
-      case 'Resolved': return 'bg-green-500 text-white';
-      case 'Under Review': return 'bg-yellow-500 text-white';
-      default: return 'bg-muted text-muted-foreground';
+      case "Reported": return "bg-blue-500 text-white";
+      case "Resolved": return "bg-green-500 text-white";
+      case "Under Review": return "bg-yellow-500 text-white";
+      default: return "bg-muted text-muted-foreground";
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-primary/5">
       <Header />
-      
       <main className="container mx-auto p-6 space-y-6">
-        {/* Welcome Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Patrol Dashboard</h1>
             <p className="text-muted-foreground">Field operations and incident management</p>
           </div>
           <Badge className="bg-primary text-primary-foreground px-4 py-2">
-            <Radio className="w-4 h-4 mr-1" />
-            PATROL ACTIVE
+            <Radio className="w-4 h-4 mr-1" /> PATROL ACTIVE
           </Badge>
         </div>
 
@@ -81,38 +83,30 @@ export default function PatrolDashboard() {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-destructive" />
-                Active Alerts
+                <AlertTriangle className="w-5 h-5 text-destructive" /> Active Alerts
               </CardTitle>
               <CardDescription>Real-time alerts for your patrol area</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-3">
-                {activeAlerts.map((alert) => (
-                  <div key={alert.id} className="p-4 border rounded-lg bg-muted/30">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">{alert.id}</Badge>
-                        <Badge className={getPriorityColor(alert.priority)}>{alert.priority}</Badge>
-                      </div>
-                      <span className="text-xs text-muted-foreground">{alert.time}</span>
+              {activeAlerts.map((alert) => (
+                <div key={alert.id} className="p-4 border rounded-lg bg-muted/30">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">{alert.id}</Badge>
+                      <Badge className={getPriorityColor(alert.priority)}>{alert.priority}</Badge>
                     </div>
-                    <div className="space-y-1">
-                      <p className="font-medium">{alert.type}: {alert.suspect}</p>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {alert.location}
-                      </p>
-                    </div>
-                    <Button size="sm" className="mt-2 w-full">
-                      Respond to Alert
-                    </Button>
+                    <span className="text-xs text-muted-foreground">{alert.time}</span>
                   </div>
-                ))}
-              </div>
-              <Button variant="outline" className="w-full">
-                View All Alerts
-              </Button>
+                  <div className="space-y-1">
+                    <p className="font-medium">{alert.type}: {alert.suspect}</p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> {alert.location}
+                    </p>
+                  </div>
+                  <Button size="sm" className="mt-2 w-full">Respond to Alert</Button>
+                </div>
+              ))}
+              <Button variant="outline" className="w-full">View All Alerts</Button>
             </CardContent>
           </Card>
 
@@ -128,7 +122,11 @@ export default function PatrolDashboard() {
                   <Plus className="w-6 h-6" />
                   <span className="text-sm">Report Incident</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex-col gap-2">
+                <Button
+                  variant="outline"
+                  className="h-20 flex-col gap-2"
+                  onClick={() => navigate("/criminal-records")}
+                >
                   <Search className="w-6 h-6" />
                   <span className="text-sm">Suspect Lookup</span>
                 </Button>
@@ -141,11 +139,10 @@ export default function PatrolDashboard() {
                   <span className="text-sm">Log Location</span>
                 </Button>
               </div>
-              
+
               <div className="pt-4 border-t">
                 <Button className="w-full bg-gradient-to-r from-primary to-primary-glow">
-                  <Radio className="w-4 h-4 mr-2" />
-                  Request Backup
+                  <Radio className="w-4 h-4 mr-2" /> Request Backup
                 </Button>
               </div>
             </CardContent>
@@ -156,35 +153,29 @@ export default function PatrolDashboard() {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Eye className="w-5 h-5" />
-              Recent Incidents
+              <Eye className="w-5 h-5" /> Recent Incidents
             </CardTitle>
             <CardDescription>Your recent incident reports and responses</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {recentIncidents.map((incident) => (
-                <div key={incident.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <Badge variant="outline">{incident.id}</Badge>
-                    <div>
-                      <p className="font-medium">{incident.type}</p>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {incident.location}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge className={getStatusColor(incident.status)}>{incident.status}</Badge>
-                    <span className="text-sm text-muted-foreground">{incident.time}</span>
+            {recentIncidents.map((incident) => (
+              <div key={incident.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg mb-2">
+                <div className="flex items-center gap-4">
+                  <Badge variant="outline">{incident.id}</Badge>
+                  <div>
+                    <p className="font-medium">{incident.type}</p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> {incident.location}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-            <Button variant="outline" className="w-full mt-4">
-              View All Incidents
-            </Button>
+                <div className="flex items-center gap-3">
+                  <Badge className={getStatusColor(incident.status)}>{incident.status}</Badge>
+                  <span className="text-sm text-muted-foreground">{incident.time}</span>
+                </div>
+              </div>
+            ))}
+            <Button variant="outline" className="w-full mt-4">View All Incidents</Button>
           </CardContent>
         </Card>
       </main>
