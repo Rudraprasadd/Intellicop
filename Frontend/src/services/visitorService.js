@@ -75,9 +75,9 @@ const visitorService = {
     });
   },
 
-  /** ✅ Mark visitor as completed — moves to completed table */
-  /** @param {number} id */
-  /** ✅ Mark visitor as completed */
+  /** ✅ Mark visitor as completed — moves to completed table
+   * @param {number} id
+   */
   complete: async (id) => {
     return visitorService.updateStatus(id, "COMPLETED");
   },
