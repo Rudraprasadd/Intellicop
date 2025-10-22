@@ -2,8 +2,10 @@ package com.backend.intellicop.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,13 +14,14 @@ import com.backend.intellicop.Repository.VisitorMeetingRepository;
 import com.backend.intellicop.entity.CompletedVisitor;
 import com.backend.intellicop.entity.VisitorMeeting;
 
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class VisitorMeetingService {
 
     @Autowired
     private VisitorMeetingRepository visitorMeetingRepository;
 
-    // ✅ Added for completed visitors
     @Autowired
     private CompletedVisitorRepository completedVisitorRepository;
 
@@ -27,7 +30,7 @@ public class VisitorMeetingService {
         return visitorMeetingRepository.findAll();
     }
 
-    /** ✅ Fetch visitors scheduled for today */
+    /** ✅ Fetch visitors scheduled for a specific date */
     public List<VisitorMeeting> getVisitorsByDate(LocalDate date) {
         return visitorMeetingRepository.findByScheduledDate(date);
     }
@@ -87,8 +90,6 @@ public class VisitorMeetingService {
                     .build();
 
             completedVisitorRepository.save(completed);
-
-            // ✅ Remove from scheduled table (move)
             visitorMeetingRepository.deleteById(id);
         }
     }
@@ -96,5 +97,50 @@ public class VisitorMeetingService {
     /** ✅ Get all completed visitors */
     public List<CompletedVisitor> getAllCompletedVisitors() {
         return completedVisitorRepository.findAll();
+    }
+
+    /** ✅ Automatically mark past-date visitors as completed at 12:00 AM */
+    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Kolkata") // Runs daily at midnight IST
+    @Transactional
+    public void autoCompleteExpiredVisitors() {
+        processExpiredVisitors("AUTO_COMPLETED");
+    }
+
+    /** ✅ Also check past visitors on server startup (in case server was down) */
+    @PostConstruct
+    @Transactional
+    public void checkExpiredVisitorsOnStartup() {
+        processExpiredVisitors("STARTUP_AUTO_COMPLETED");
+    }
+
+    /** ♻️ Common logic reused by both scheduled & startup methods */
+    private void processExpiredVisitors(String statusLabel) {
+        LocalDate today = LocalDate.now();
+
+        List<VisitorMeeting> expiredVisitors = visitorMeetingRepository.findAll().stream()
+                .filter(v -> v.getScheduledDate().isBefore(today)
+                        && !"COMPLETED".equalsIgnoreCase(v.getStatus()))
+                .collect(Collectors.toList());
+
+        if (expiredVisitors.isEmpty()) return;
+
+        for (VisitorMeeting meeting : expiredVisitors) {
+            CompletedVisitor completed = CompletedVisitor.builder()
+                    .visitorName(meeting.getVisitorName())
+                    .visitorContact(meeting.getVisitorContact())
+                    .inmateName(meeting.getInmateName())
+                    .purpose(meeting.getPurpose())
+                    .scheduledDate(meeting.getScheduledDate())
+                    .scheduledTime(meeting.getScheduledTime())
+                    .status(statusLabel)
+                    .remarks("Auto-marked as completed (past date).")
+                    .createdAt(meeting.getCreatedAt())
+                    .build();
+
+            completedVisitorRepository.save(completed);
+            visitorMeetingRepository.deleteById(meeting.getId());
+        }
+
+        System.out.println("✅ " + statusLabel + ": " + expiredVisitors.size() + " past visitor(s) processed on " + today);
     }
 }
