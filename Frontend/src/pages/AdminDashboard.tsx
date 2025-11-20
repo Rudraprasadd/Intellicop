@@ -228,11 +228,11 @@ export default function AdminDashboard() {
                 <BarChart3 className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold">System Reports</h3>
-                <p className="text-sm text-muted-foreground">Generate performance and activity reports</p>
+                <h3 className="font-semibold">Case Reports</h3>
+                <p className="text-sm text-muted-foreground">Create and review the cases</p>
               </div>
-              <Button className="w-full" variant="outline">
-                Generate Reports
+              <Button className="w-full"  onClick={() => navigate("/case-reports")} variant="outline">
+                Generate Cases
               </Button>
             </CardContent>
           </Card>

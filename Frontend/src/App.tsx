@@ -17,6 +17,7 @@ import ManageRole from "./pages/ManageRole";
 import CriminalRecords from "./pages/CriminalRecords";
 import VisitorDataPage from "./pages/VisitorDataPage";
 import TodayVisitorsPage from "./pages/TodayVisitorsPage";
+import CaseReports from "./pages/CaseReports";
 
 const queryClient = new QueryClient();
 
@@ -109,7 +110,7 @@ const DashboardRouter = () => {
       return <Navigate to="/login" replace />;
   }
 };
-
+// case-reports
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -205,6 +206,16 @@ const App = () => (
                   <ProtectedRoute>
                     <MultiRoleRoute allowedRoles={["admin", "patrol", "investigating","desk","field"]}>
                       <CriminalRecords />
+                    </MultiRoleRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/case-reports"
+                element={
+                  <ProtectedRoute>
+                    <MultiRoleRoute allowedRoles={["admin", "patrol", "investigating","desk","field"]}>
+                      <CaseReports />
                     </MultiRoleRoute>
                   </ProtectedRoute>
                 }
