@@ -361,7 +361,7 @@ export default function DeskDashboard() {
                     <Users className="w-4 h-4 mr-2" /> Visitor Data
                   </Button>
                 </div>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => navigate("/assign-officers")}>
                   <CheckCircle className="w-4 h-4 mr-2" /> Assign Case to Officer
                 </Button>
               </div>

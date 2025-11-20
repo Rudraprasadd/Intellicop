@@ -18,6 +18,7 @@ import CriminalRecords from "./pages/CriminalRecords";
 import VisitorDataPage from "./pages/VisitorDataPage";
 import TodayVisitorsPage from "./pages/TodayVisitorsPage";
 import CaseReports from "./pages/CaseReports";
+import AssignOfficers from "./pages/AssignOfficers";
 
 const queryClient = new QueryClient();
 
@@ -226,6 +227,16 @@ const App = () => (
                   <ProtectedRoute>
                     <RoleRoute allowedRole="desk">
                       <VisitorDataPage />
+                    </RoleRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assign-officers"
+                element={
+                  <ProtectedRoute>
+                    <RoleRoute allowedRole="desk">
+                      <AssignOfficers />
                     </RoleRoute>
                   </ProtectedRoute>
                 }
