@@ -38,6 +38,8 @@ public class SecurityConfig {
         "/api/users/total",
         "/api/users/add",
         "/api/health/database",
+        "/api/criminal-cases/**",
+        "/api/criminal-cases/**",
         "/api/criminals/**",      // <-- Added for public access
         "/api/users",             // Allow access to users endpoint
         "/api/users/**",          // Allow access to specific user endpoints
@@ -65,6 +67,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/visitors/**").permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/api/visitors/**").permitAll()
                 .requestMatchers("/api/criminals/**").permitAll()
+                .requestMatchers("/api/criminal-cases/**").permitAll() 
+                .requestMatchers(HttpMethod.GET, "/api/criminal-cases/**").permitAll() 
+                .requestMatchers("/api/criminal-cases/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/criminal-cases/**").permitAll()
                 .anyRequest().authenticated()
             )
             .httpBasic(withDefaults());

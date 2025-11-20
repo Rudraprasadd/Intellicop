@@ -16,109 +16,17 @@ import {
 import { Header } from "@/components/layout/Header";
 import { X, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { criminalService } from "@/services/criminalService";
+// 🔽 use caseService instead of criminalService
+import { caseService } from "@/services/caseService";
 import { CriminalModal, CriminalFormData } from "@/components/CriminalModal";
 
 export default function CriminalRecords() {
-    const criminalData = [
-        {
-            id: 1,
-            name: "Rohan Verma",
-            age: 28,
-            crime: "Theft",
-            lastSeen: "Mumbai Railway Station",
-            threat: "Medium",
-            status: "Wanted",
-            record: "Involved in multiple theft cases in local trains and crowded markets.",
-            complainantName: "Amit Sharma",
-            complainantMobile: "9876543210",
-            complainantAddress: "Sector 12, Navi Mumbai",
-            incidentDate: "2024-02-10",
-            incidentTime: "14:30",
-            incidentLocation: "CST Station, Mumbai",
-            incidentType: "Theft",
-            incidentDescription: "Suspect stole a backpack containing valuable electronics.",
-            accusedName: "Unknown",
-            victimName: "Amit Sharma",
-            photo: "/images/default-criminal.jpg",
-            preview: null,
-            evidenceFiles: null,
-        },
-        {
-            id: 2,
-            name: "Sanjay Naik",
-            age: 34,
-            crime: "Assault",
-            lastSeen: "Hyderabad Banjara Hills",
-            threat: "High",
-            status: "Under Investigation",
-            record: "Accused of involvement in a violent altercation outside a nightclub.",
-            complainantName: "Rahul Singh",
-            complainantMobile: "9123456780",
-            complainantAddress: "Banjara Hills, Hyderabad",
-            incidentDate: "2024-01-25",
-            incidentTime: "23:15",
-            incidentLocation: "Night Owl Club, Hyderabad",
-            incidentType: "Assault",
-            incidentDescription: "Victim was physically attacked leading to minor injuries.",
-            accusedName: "Sanjay Naik",
-            victimName: "Rahul Singh",
-            photo: "/images/default-criminal.jpg",
-            preview: null,
-            evidenceFiles: null,
-        },
-        {
-            id: 3,
-            name: "Priya Shetty",
-            age: 26,
-            crime: "Cyber Crime",
-            lastSeen: "Bangalore Electronic City",
-            threat: "Low",
-            status: "Captured",
-            record: "Involved in online scam targeting senior citizens through phishing calls.",
-            complainantName: "Suresh Kumar",
-            complainantMobile: "9988776655",
-            complainantAddress: "HSR Layout, Bangalore",
-            incidentDate: "2024-03-12",
-            incidentTime: "11:45",
-            incidentLocation: "Online",
-            incidentType: "Cyber Crime",
-            incidentDescription: "Used fake bank verification calls to collect OTPs from victims.",
-            accusedName: "Priya Shetty",
-            victimName: "Multiple victims",
-            photo: "/images/default-criminal.jpg",
-            preview: null,
-            evidenceFiles: null,
-        },
-        {
-            id: 4,
-            name: "Mohammed Irfan",
-            age: 30,
-            crime: "Fraud",
-            lastSeen: "Pune City Mall",
-            threat: "Medium",
-            status: "Wanted",
-            record: "Involved in credit card fraud rings operating across Maharashtra.",
-            complainantName: "Akshay Patil",
-            complainantMobile: "9090909090",
-            complainantAddress: "Kothrud, Pune",
-            incidentDate: "2024-02-05",
-            incidentTime: "16:00",
-            incidentLocation: "Pune City Mall",
-            incidentType: "Fraud",
-            incidentDescription: "Used cloned credit cards to purchase high-value items.",
-            accusedName: "Mohammed Irfan",
-            victimName: "Multiple cardholders",
-            photo: "/images/default-criminal.jpg",
-            preview: null,
-            evidenceFiles: null,
-        },
-    ];
-
     const navigate = useNavigate();
-    const [suspects, setSuspects] = useState<CriminalFormData[]>(criminalData); // Initialize with dummy data
-    const [filteredSuspects, setFilteredSuspects] = useState<CriminalFormData[]>(criminalData);
-    const [loading, setLoading] = useState(false); // Set to false since we have dummy data
+
+    // removed static data
+    const [suspects, setSuspects] = useState<CriminalFormData[]>([]);
+    const [filteredSuspects, setFilteredSuspects] = useState<CriminalFormData[]>([]);
+    const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [editingCriminal, setEditingCriminal] = useState<CriminalFormData | null>(null);
     const [selectedCriminal, setSelectedCriminal] = useState<CriminalFormData | null>(null);
@@ -130,11 +38,27 @@ export default function CriminalRecords() {
     const [currentPage, setCurrentPage] = useState(1);
     const recordsPerPage = 4;
 
-    // Use dummy data instead of API call
+    // ✅ Fetch CASES from backend
     useEffect(() => {
-        setSuspects(criminalData);
-        setFilteredSuspects(criminalData);
-        setLoading(false);
+        const fetchCases = async () => {
+            try {
+                const data = await caseService.getAll();
+                const normalized: CriminalFormData[] = data.map((c: any) => ({
+                    ...c,
+                    photo: c.photo || "/images/default-criminal.jpg",
+                    preview: null,
+                    evidenceFiles: null,
+                }));
+                setSuspects(normalized);
+                setFilteredSuspects(normalized);
+            } catch (err) {
+                console.error("Error fetching case records:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCases();
     }, []);
 
     // Filter suspects
@@ -162,48 +86,54 @@ export default function CriminalRecords() {
         }
     }, [alertMessage]);
 
-    // Handle Add/Edit Criminal using the modal component
+    // Add / Edit from modal → CASE API
     const handleAddOrEditCriminal = async (criminalData: CriminalFormData) => {
         setIsSubmitting(true);
         try {
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
             if (editingCriminal && editingCriminal.id) {
-                // Update existing criminal
-                setSuspects(prev => 
-                    prev.map(c => c.id === editingCriminal.id ? { ...criminalData, id: editingCriminal.id } : c)
+                const updated = await caseService.update(editingCriminal.id, criminalData);
+                setSuspects(prev =>
+                    prev.map(c =>
+                        c.id === editingCriminal.id
+                            ? { ...c, ...updated }
+                            : c
+                    )
                 );
-                setAlertMessage('Case updated successfully!');
+                setAlertMessage("Case updated successfully!");
             } else {
-                // Add new criminal
-                const newId = Math.max(...suspects.map(s => s.id || 0)) + 1;
-                const newCriminal = { ...criminalData, id: newId };
+                const created = await caseService.create(criminalData);
+                const newCriminal: CriminalFormData = {
+                    ...created,
+                    photo: created.photo || "/images/default-criminal.jpg",
+                    preview: null,
+                    evidenceFiles: null,
+                };
                 setSuspects(prev => [...prev, newCriminal]);
-                setAlertMessage('Case added successfully!');
+                setAlertMessage("Case added successfully!");
             }
-            
+
             setShowAddModal(false);
             setEditingCriminal(null);
         } catch (error) {
-            console.error('Error saving criminal:', error);
-            setAlertMessage('Failed to save case. Please try again.');
+            console.error("Error saving case:", error);
+            setAlertMessage("Failed to save case. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Are you sure you want to delete this criminal?")) return;
+        if (!confirm("Are you sure you want to delete this case?")) return;
         try {
+            await caseService.remove(id);
             setSuspects(prev => prev.filter((c) => c.id !== id));
-            setAlertMessage("Criminal deleted successfully!");
+            setAlertMessage("Case deleted successfully!");
             if (selectedCriminal?.id === id) {
                 setSelectedCriminal(null);
             }
         } catch (err) {
-            console.error("Error deleting criminal:", err);
-            setAlertMessage("Error deleting criminal");
+            console.error("Error deleting case:", err);
+            setAlertMessage("Error deleting case");
         }
     };
 
@@ -246,25 +176,29 @@ export default function CriminalRecords() {
     const handleReportUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            console.log('Report file selected:', file);
+            console.log("Report file selected:", file);
         }
     };
 
+    // Detail modal update → CASE API
     const handleUpdateCriminal = async (e: FormEvent) => {
         e.preventDefault();
-        if (!selectedCriminal) return;
+        if (!selectedCriminal || !selectedCriminal.id) return;
 
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
+            const updated = await caseService.update(selectedCriminal.id, selectedCriminal);
             setSuspects(prev =>
-                prev.map((c) => (c.id === selectedCriminal.id ? selectedCriminal : c))
+                prev.map((c) =>
+                    c.id === selectedCriminal.id
+                        ? { ...c, ...updated }
+                        : c
+                )
             );
             setSelectedCriminal(null);
             setAlertMessage("Criminal updated successfully!");
         } catch (err) {
-            setAlertMessage("Error updating criminal");
+            console.error("Error updating case:", err);
+            setAlertMessage("Error updating case");
         }
     };
 
@@ -357,7 +291,9 @@ export default function CriminalRecords() {
                                 <img
                                     src={
                                         suspect.preview ||
-                                        (typeof suspect.photo === "string" ? suspect.photo : "/images/default-criminal.jpg")
+                                        (typeof suspect.photo === "string"
+                                            ? suspect.photo
+                                            : "/images/default-criminal.jpg")
                                     }
                                     alt={suspect.name}
                                     className="object-cover w-20 h-20 rounded-full border-2 border-gray-300 dark:border-gray-600"

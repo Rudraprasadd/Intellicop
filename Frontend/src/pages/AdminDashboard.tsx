@@ -10,6 +10,7 @@ import { Users, FileText, Activity, BarChart3, UserPlus, Shield, Database, Alert
 export default function AdminDashboard() {
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [databaseHealth, setDatabaseHealth] = useState<number>(0);
+  const [activeCases, setActiveCases] = useState<number>(0); // ✅ new state
   const [roleCounts, setRoleCounts] = useState({
     patrolOfficers: 0,
     deskOfficers: 0,
@@ -32,9 +33,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usersRes, healthRes] = await Promise.all([
+        const [usersRes, healthRes, activeCasesRes] = await Promise.all([
           axios.get("http://localhost:8081/api/users/total"),
-          axios.get("http://localhost:8081/api/health/database")
+          axios.get("http://localhost:8081/api/health/database"),
+          axios.get("http://localhost:8081/api/criminal-cases/active-count"), // ✅ fetch active cases
         ]);
 
         const data = usersRes.data;
@@ -50,6 +52,13 @@ export default function AdminDashboard() {
 
         setRoleCounts(counts);
         setDatabaseHealth(healthRes.data.healthPercentage);
+
+        // ✅ Set active cases from backend (expects a number)
+        if (typeof activeCasesRes.data === "number") {
+          setActiveCases(activeCasesRes.data);
+        } else {
+          setActiveCases(0);
+        }
 
         // Use backend total directly
         if (typeof data.totalUsers === "number") {
@@ -71,7 +80,7 @@ export default function AdminDashboard() {
 
   const stats = [
     { title: "Total Users", value: totalUsers.toString(), icon: Users, color: "text-primary" },
-    { title: "Active Cases", value: "89", icon: FileText, color: "text-blue-600" },
+    { title: "Active Cases", value: activeCases.toString(), icon: FileText, color: "text-blue-600" }, // ✅ now dynamic
     { title: "System Alerts", value: "12", icon: AlertTriangle, color: "text-destructive" },
     { 
       title: "Database Health", 
