@@ -87,6 +87,8 @@ const MultiRoleRoute = ({
 // Dashboard Router - routes users to their role-specific dashboard
 const DashboardRouter = () => {
   const { user } = useAuth();
+  console.log(user);
+  
 
   if (!user) {
     return <Navigate to="/login" replace />;

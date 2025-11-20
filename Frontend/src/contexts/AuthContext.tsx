@@ -63,6 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.ok && data.success) {
         const loggedUser: User = { username, role: data.role };
         setUser(loggedUser);
+        console.log('Login successful:', loggedUser);
         sessionStorage.setItem('intelicop_user', JSON.stringify(loggedUser));
         return true;
       }
