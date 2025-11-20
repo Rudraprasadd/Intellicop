@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
+import { CriminalModal, CriminalFormData } from "@/components/CriminalModal";
 
 import {
   MapPin,
@@ -34,8 +35,10 @@ import { Button } from "@/components/ui/button";
 export default function PatrolDashboard() {
   const navigate = useNavigate();
 
-  // REPORT INCIDENT MODAL
-  const [openReportModal, setOpenReportModal] = useState(false);
+  // REPORT INCIDENT MODAL - Replaced with CriminalModal
+  const [showCriminalModal, setShowCriminalModal] = useState(false);
+  const [editingCriminal, setEditingCriminal] = useState<CriminalFormData | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // CASE SELECTION MODAL MODE: "upload" | "location" | null
   const [openCasesModal, setOpenCasesModal] = useState<null | "upload" | "location">(null);
@@ -47,7 +50,6 @@ export default function PatrolDashboard() {
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-
   // STATES
   const [selectedCase, setSelectedCase] = useState<any>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -58,26 +60,28 @@ export default function PatrolDashboard() {
     if (!openUploadModal) setUploadedFile(null);
   }, [openUploadModal]);
 
-  // INCIDENT FORM STATE
-  const [incidentForm, setIncidentForm] = useState({
-    complainantName: "",
-    complainantMobile: "",
-    complainantAddress: "",
-    incidentDate: "",
-    incidentTime: "",
-    incidentLocation: "",
-    incidentType: "",
-    incidentDescription: "",
-    victimName: "",
-  });
-
-  const handleChange = (e: any) => {
-    setIncidentForm({ ...incidentForm, [e.target.name]: e.target.value });
-  };
-
-  const handleAddIncident = () => {
-    console.log("Added Incident:", incidentForm);
-    setOpenReportModal(false);
+  // Handle Add/Edit Criminal using the modal component
+  const handleAddOrEditCriminal = async (criminalData: CriminalFormData) => {
+    setIsSubmitting(true);
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log("Criminal data to submit:", criminalData);
+      
+      // Here you can add your actual API call logic
+      // For example:
+      // const response = await criminalService.addCriminal(criminalData);
+      
+      setShowCriminalModal(false);
+      setEditingCriminal(null);
+      
+      console.log(editingCriminal ? 'Case updated successfully!' : 'Case added successfully!');
+    } catch (error) {
+      console.error('Error saving criminal:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // STATIC DATA
@@ -160,9 +164,9 @@ export default function PatrolDashboard() {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-destructive" /> Active Alerts
+                <AlertTriangle className="w-5 h-5 text-destructive" /> Active Cases
               </CardTitle>
-              <CardDescription>Real-time alerts for your patrol area</CardDescription>
+              <CardDescription>Real-time active cases</CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">
@@ -201,8 +205,11 @@ export default function PatrolDashboard() {
 
               <div className="grid grid-cols-2 gap-3">
 
-                {/* REPORT INCIDENT */}
-                <Button className="h-20 flex-col gap-2" onClick={() => setOpenReportModal(true)}>
+                {/* REPORT INCIDENT - Updated to use CriminalModal */}
+                <Button 
+                  className="h-20 flex-col gap-2" 
+                  onClick={() => setShowCriminalModal(true)}
+                >
                   <Plus className="w-6 h-6" />
                   <span className="text-sm">Report Incident</span>
                 </Button>
@@ -285,72 +292,6 @@ export default function PatrolDashboard() {
           </CardContent>
         </Card>
 
-
-        {/* -------------------- REPORT INCIDENT MODAL -------------------- */}
-        <Dialog open={openReportModal} onOpenChange={setOpenReportModal}>
-          <DialogContent className="max-w-2xl h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Report New Incident</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4 py-2">
-
-              <div>
-                <Label>Complainant Name</Label>
-                <Input name="complainantName" value={incidentForm.complainantName} onChange={handleChange} />
-              </div>
-
-              <div>
-                <Label>Complainant Mobile</Label>
-                <Input name="complainantMobile" value={incidentForm.complainantMobile} onChange={handleChange} />
-              </div>
-
-              <div>
-                <Label>Complainant Address</Label>
-                <Input name="complainantAddress" value={incidentForm.complainantAddress} onChange={handleChange} />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Incident Date</Label>
-                  <Input type="date" name="incidentDate" value={incidentForm.incidentDate} onChange={handleChange} />
-                </div>
-
-                <div>
-                  <Label>Incident Time</Label>
-                  <Input type="time" name="incidentTime" value={incidentForm.incidentTime} onChange={handleChange} />
-                </div>
-              </div>
-
-              <div>
-                <Label>Incident Location</Label>
-                <Input name="incidentLocation" value={incidentForm.incidentLocation} onChange={handleChange} />
-              </div>
-
-              <div>
-                <Label>Incident Type</Label>
-                <Input name="incidentType" value={incidentForm.incidentType} onChange={handleChange} />
-              </div>
-
-              <div>
-                <Label>Incident Description</Label>
-                <Textarea name="incidentDescription" value={incidentForm.incidentDescription} onChange={handleChange} rows={4} />
-              </div>
-
-              <div>
-                <Label>Victim Name</Label>
-                <Input name="victimName" value={incidentForm.victimName} onChange={handleChange} />
-              </div>
-
-            </div>
-
-            <DialogFooter>
-              <Button className="w-full" onClick={handleAddIncident}>Add Incident</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-
         {/* -------------------- CASE SELECTION MODAL -------------------- */}
         <Dialog open={!!openCasesModal} onOpenChange={() => setOpenCasesModal(null)}>
           <DialogContent className="max-w-xl h-[70vh] overflow-y-auto">
@@ -409,8 +350,6 @@ export default function PatrolDashboard() {
           </DialogContent>
         </Dialog>
 
-
-
         {/* -------------------- UPDATE LOCATION MODAL -------------------- */}
         <Dialog open={openLocationModal} onOpenChange={setOpenLocationModal}>
           <DialogContent className="max-w-lg">
@@ -451,13 +390,6 @@ export default function PatrolDashboard() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-         {/* <Button onClick={() => navigate("/case-reports")} className="w-full bg-gradient-to-r from-primary to-primary-glow">
-                  <Radio className="w-4 h-4 mr-2" /> View Cases
-                </Button>
-                <Button onClick={() => navigate("/criminal-records")} className="w-full bg-gradient-to-r from-primary to-primary-glow">
-                  <Radio className="w-4 h-4 mr-2" /> Criminal Cases
-                </Button> */}
-
 
         {/* -------------------- UPLOAD PHOTO MODAL -------------------- */}
         <Dialog open={openUploadModal} onOpenChange={setOpenUploadModal}>
@@ -506,6 +438,16 @@ export default function PatrolDashboard() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* -------------------- CRIMINAL MODAL COMPONENT -------------------- */}
+        <CriminalModal
+          showModal={showCriminalModal}
+          setShowModal={setShowCriminalModal}
+          editingCriminal={editingCriminal}
+          setEditingCriminal={setEditingCriminal}
+          onSubmit={handleAddOrEditCriminal}
+          isSubmitting={isSubmitting}
+        />
 
       </main>
     </div>

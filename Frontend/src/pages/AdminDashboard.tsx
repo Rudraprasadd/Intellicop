@@ -229,10 +229,10 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <h3 className="font-semibold">Case Reports</h3>
-                <p className="text-sm text-muted-foreground">Create and review the cases</p>
+                <p className="text-sm text-muted-foreground">View and manage all cases.</p>
               </div>
               <Button className="w-full"  onClick={() => navigate("/case-reports")} variant="outline">
-                Generate Cases
+                Access Cases
               </Button>
             </CardContent>
           </Card>
